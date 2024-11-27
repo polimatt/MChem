@@ -394,7 +394,7 @@ def vk_molecclass(df:pd.DataFrame,regions:dict=vk_areas.copy(),region_colours:di
 
 def AI(c:int|np.ndarray,h:int|np.ndarray,n:int|np.ndarray,o:int|np.ndarray,s:int|np.ndarray,p:int|np.ndarray)->float|np.ndarray:
     ai = None
-    if np.all([isinstance(i, np.ndarray) for i in [c,h,n,o,s,p]]):
+    if np.all([isinstance(i, np.ndarray) or isinstance(i,pd.Series) for i in [c,h,n,o,s,p]]):
         ai = np.zeros(len(c))
         for i in range(len(ai)):
             if (c[i] - o[i] - n[i] - s[i] - p[i]) != 0:
@@ -416,19 +416,28 @@ def vk_ai(df:pd.DataFrame,ai,values=ai_boundaries,colour=ai_colours,title=None,s
     labels = [f'AI $\\leq$ {values[0]}']
 
     idxs = []
+    labels = []
 
-    idxs.append(np.where(ai<=values[0])[0])
+    for j in range(len(values)+1):
+        # if first
+        if j == 0:
+            labels.append(f'AI $\\leq$ {values[j]}')
+            idxs.append(np.where(ai <= values[j]))
 
-    for i in range(len(values)-1):
-        if values[i] != values[-2]:
-            labels += [f'{values[i]} < AI $\\leq$ {values[i+1]}']
-            idxs.append(np.where((ai>values[i])&(ai<=values[i+1]))[0])
+        # if last
+        elif j == len(values):
+            labels.append(f'AI $\\leq$ {values[-1]}')
+            idxs.append(np.where(ai >= values[-1]))
+
+        # if second to last
+        elif values[j] == values[-1]:
+            labels.append(f'{values[j-1]} < AI < {values[j]}')
+            idxs.append(np.where((ai > values[j-1])&(ai < values[j])))
+
+        # all other values
         else:
-            labels += [f'{values[i]} < AI < {values[i+1]}']
-            idxs.append(np.where((ai>values[i])&(ai<values[i+1]))[0])
-
-    labels += [f'AI $\\geq$ {values[-1]}']
-    idxs.append(np.where(ai>=values[-1])[0])
+            labels.append(f'{values[j-1]} < AI $\\leq$ {values[j]}')
+            idxs.append(np.where((ai > values[j-1])&(ai <= values[j])))
 
     if fig == None and ax == None:
         fig, ax = plt.subplots()

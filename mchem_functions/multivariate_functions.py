@@ -43,7 +43,7 @@ def PCoA(distance_matrix:np.ndarray,number_of_dimensions:int=None):
         A = I - (J / n)
 
         # get W, which encodes the variance and structure of the original dataset as represented by the squared distances, after being adjusted by double-centering
-        W = -.5 * la.multi_dot([A, D2, A.T])
+        W = -.5 * (A @ D2 @ A.T)
         return W
     
     W = double_centering(D)
