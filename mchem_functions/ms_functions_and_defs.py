@@ -153,162 +153,6 @@ def LatexMolecFormula(str:str):
     final_str += '$'
     return final_str
 
-#////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-## Plotting
-
-def save_fig(fig:plt.Figure,save_path:str):
-    fig.savefig(save_path, dpi=600, facecolor = '#fffa', bbox_inches='tight')
-
-def massspectrum_plot(mz:tuple|list|np.ndarray,intensities:tuple|list|np.ndarray,mode:str='bar',title:str=None,save_path:str=None,fig:plt.Figure=None,ax:plt.Axes=None,xlim:list=[],ylim:list=[],**kwargs):
-
-    if fig == None and ax == None:
-        fig, ax = plt.subplots()
-
-    if mode == 'bar':
-        ax.bar(mz,intensities,**kwargs)
-
-    if mode == 'plot':
-        # sort values by m/z values
-        spectrum = pd.DataFrame({'m/z':mz, 'intensity':intensities}).sort_values('m/z')
-        ax.plot(spectrum['m/z'],spectrum['intensity'],**kwargs)  
-    
-    if title != None: ax.set_title(title,fontsize=title_fontsize)
-    ax.set_xlabel('$m$/$z$',fontsize=normal_fontsize)
-    ax.set_ylabel('Intensity',fontsize=normal_fontsize)
-    
-    if xlim == []: xlim = [np.min(mz),np.max(mz)]
-    if ylim == []: ylim = 0
-    
-    ax.set_xlim(xlim)
-    ax.set_ylim(ylim)
-
-    if save_path!=None:
-        save_fig(fig,save_path)
-
-    return fig, ax
-
-def dbe_plot(mz:tuple|list|np.ndarray,dbe:tuple|list|np.ndarray,title:str=None,save_path:str=None,fig:plt.Figure=None,ax:plt.Axes=None,xlim:list=[],ylim:list=[],**kwargs):
-    '''
-    
-    '''
-    if fig == None and ax == None:
-        fig, ax = plt.subplots()
-    
-    ax.bar(mz,dbe,**kwargs)
-    if title != None: ax.set_title(title,fontsize=title_fontsize)
-    ax.set_xlabel('$m$/$z$',fontsize=normal_fontsize)
-    ax.set_ylabel('DBE',fontsize=normal_fontsize)
-
-    if xlim == []: xlim = [np.min(mz),np.max(mz)]
-    ax.set_xlim(xlim)
-    if ylim != []: ax.set_ylim(ylim)
-
-    if save_path!=None:
-        save_fig(fig,save_path)
-
-    return fig, ax
-
-def kendrick_plot(kmass,kmd,z_stars=None,z_wanted:int|float=None,title:str=None,save_path:str=None,fig:plt.Figure=None,ax:plt.Axes=None,xlim:list=[],ylim:list=[],**kwargs):
-
-    if fig == None and ax == None:
-        fig, ax = plt.subplots()
-    
-    if z_wanted != None:
-        assert np.any(z_stars) != None, 'Need a list or an array of Z* values (z_stars=)'
-        idx = np.where(z_stars==z_wanted)
-        kmass = kmass[idx]
-        kmd = kmd[idx]
-    
-    # can give all z_stars and no z_wanted, in this case a single plot will be generated with all z* values in different colours.
-    if np.any(z_stars) != None and z_wanted == None:
-        Z_stars_unique = np.unique(z_stars)
-        for z in Z_stars_unique:
-            idx = np.where(z_stars==z)
-            ax.scatter(kmass[idx],kmd[idx],marker='.',label=f'Z* = {int(z)}',**kwargs)
-        ax.legend(framealpha=1,bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0)
-
-    else:
-        ax.scatter(kmass,kmd,marker='.',**kwargs)
-
-    ax.set_xlabel('Kendrick Mass [g mol$^{^-1}$]',fontsize=normal_fontsize)
-    ax.set_ylabel('Kendrick Mass Defect [mg mol$^{^-1}$]',fontsize=normal_fontsize)  
-    
-    if xlim != []: ax.set_xlim(xlim)
-    if ylim != []: ax.set_ylim(ylim)
-
-    if title != None:
-        if z_wanted != None:
-            title += f' (Z* = {int(z_wanted)})'
-        ax.set_title(title,fontsize=title_fontsize)
-
-    if save_path!=None:
-        save_fig(fig,save_path)
-
-    return fig, ax
-
-def vk_diagram(df:pd.DataFrame,title:str=None,save_path:str=None,fig:plt.Figure=None,ax:plt.Axes=None,xlim:list=[],ylim:list=[],**kwargs):
-    
-    if fig == None and ax == None:
-        fig, ax = plt.subplots()
-    
-    ax.scatter(df['O/C'], df['H/C'],marker='.',**kwargs)
-    ax.set_xlabel('O/C',fontsize=normal_fontsize) 
-    ax.set_ylabel('H/C',fontsize=normal_fontsize)
-    ax.legend(framealpha=1,bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0,fontsize=normal_fontsize)
-    
-    if xlim != []: ax.set_xlim(xlim)
-    if ylim != []: ax.set_ylim(ylim)
-
-    if title != None:
-        ax.set_title(title,fontsize=title_fontsize)
-
-    if save_path!=None:
-        save_fig(fig,save_path)
-    
-    return fig, ax
-
-def density_vk_diagram(df:pd.DataFrame,cmap='viridis',title:str=None,save_path:str=None,fig:plt.Figure=None,ax:plt.Axes=None,cbar:bool=True,xlim:list=[],ylim:list=[],**kwargs):
-
-    # from https://stackoverflow.com/questions/20105364/how-can-i-make-a-scatter-plot-colored-by-density
-
-    if 'O/C' not in df.columns:
-        df['O/C'] = df['O'] / df['C']
-    if 'H/C' not in df.columns:
-        df['H/C'] = df['H'] / df['C']
-
-    x = df['O/C']
-    y = df['H/C']
-
-    xy = np.vstack([x,y])
-    z = gaussian_kde(xy)(xy)
-
-    # Sort the points by density, so that the densest points are plotted last
-    idx = z.argsort()
-    x, y, z = x[idx], y[idx], z[idx]
-
-    if fig == None and ax == None:
-        fig, ax = plt.subplots()
-    
-    mappable = ax.scatter(x, y, c=z, marker='.',cmap=cmap,**kwargs)
-
-    if cbar:
-        cbar = fig.colorbar(mappable)
-        cbar.set_label('Kernel Density',fontsize=normal_fontsize)
-
-    ax.set_xlabel('O/C',fontsize=normal_fontsize) 
-    ax.set_ylabel('H/C',fontsize=normal_fontsize)
-
-    if xlim != []: ax.set_xlim(xlim)
-    if ylim != []: ax.set_ylim(ylim)
-
-    if title != None:
-        ax.set_title(title,fontsize=title_fontsize)
-
-    if save_path!=None:
-        save_fig(fig,save_path)
-
-    return fig, ax
-
 def molecclass(df:pd.DataFrame,regions:dict=vk_areas.copy()):
     vk_sorted = {}
     idxs_sorted =[]
@@ -349,7 +193,170 @@ def molecclass(df:pd.DataFrame,regions:dict=vk_areas.copy()):
 
     return vk_sorted
 
-def vk_molecclass(df:pd.DataFrame,regions:dict=vk_areas.copy(),region_colours:dict=vk_region_colours,title:str=None,save_path:str=None,fig:plt.Figure=None,ax:plt.Axes=None,xlim:list=[],ylim:list=[],**kwargs):
+#////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+## Plotting
+
+def save_fig(fig:plt.Figure,save_path:str):
+    fig.savefig(save_path, dpi=600, facecolor = '#fffa', bbox_inches='tight')
+
+def massspectrum_plot(mz:tuple|list|np.ndarray,intensities:tuple|list|np.ndarray,mode:str='bar',title:str=None,save_path:str=None,ax:plt.Axes=None,xlim:list=[],ylim:list=[],**kwargs):
+
+    if ax == None:
+        fig, ax = plt.subplots()
+
+    if mode == 'bar':
+        ax.bar(mz,intensities,**kwargs)
+
+    if mode == 'plot':
+        # sort values by m/z values
+        spectrum = pd.DataFrame({'m/z':mz, 'intensity':intensities}).sort_values('m/z')
+        ax.plot(spectrum['m/z'],spectrum['intensity'],**kwargs)  
+    
+    if title != None: ax.set_title(title,fontsize=title_fontsize)
+    ax.set_xlabel('$m$/$z$',fontsize=normal_fontsize)
+    ax.set_ylabel('Intensity',fontsize=normal_fontsize)
+    
+    if xlim == []: xlim = [np.min(mz),np.max(mz)]
+    if ylim == []: ylim = 0
+    
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
+
+    if save_path!=None:
+        save_fig(plt.gcf(),save_path)
+
+    return ax
+
+def dbe_plot(mz:tuple|list|np.ndarray,dbe:tuple|list|np.ndarray,title:str=None,save_path:str=None,ax:plt.Axes=None,xlim:list=[],ylim:list=[],**kwargs):
+    '''
+    
+    '''
+    if ax == None:
+        fig, ax = plt.subplots()
+    
+    ax.bar(mz,dbe,**kwargs)
+    if title != None: ax.set_title(title,fontsize=title_fontsize)
+    ax.set_xlabel('$m$/$z$',fontsize=normal_fontsize)
+    ax.set_ylabel('DBE',fontsize=normal_fontsize)
+
+    if xlim == []: xlim = [np.min(mz),np.max(mz)]
+    ax.set_xlim(xlim)
+    if ylim != []: ax.set_ylim(ylim)
+
+    if save_path!=None:
+        save_fig(plt.gcf(),save_path)
+
+    return ax
+
+def kendrick_plot(kmass,kmd,z_stars=None,z_wanted:int|float=None,title:str=None,save_path:str=None,ax:plt.Axes=None,xlim:list=[],ylim:list=[],**kwargs):
+
+    if ax == None:
+        fig, ax = plt.subplots()
+    
+    if z_wanted != None:
+        assert np.any(z_stars) != None, 'Need a list or an array of Z* values (z_stars=)'
+        idx = np.where(z_stars==z_wanted)
+        kmass = kmass[idx]
+        kmd = kmd[idx]
+    
+    # can give all z_stars and no z_wanted, in this case a single plot will be generated with all z* values in different colours.
+    if np.any(z_stars) != None and z_wanted == None:
+        Z_stars_unique = np.unique(z_stars)
+        for z in Z_stars_unique:
+            idx = np.where(z_stars==z)
+            ax.scatter(kmass[idx],kmd[idx],marker='.',label=f'Z* = {int(z)}',**kwargs)
+        ax.legend(framealpha=1,bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0)
+
+    else:
+        ax.scatter(kmass,kmd,marker='.',**kwargs)
+
+    ax.set_xlabel('Kendrick Mass [g mol$^{^-1}$]',fontsize=normal_fontsize)
+    ax.set_ylabel('Kendrick Mass Defect [mg mol$^{^-1}$]',fontsize=normal_fontsize)  
+    
+    if xlim != []: ax.set_xlim(xlim)
+    if ylim != []: ax.set_ylim(ylim)
+
+    if title != None:
+        if z_wanted != None:
+            title += f' (Z* = {int(z_wanted)})'
+        ax.set_title(title,fontsize=title_fontsize)
+
+    if save_path!=None:
+        save_fig(plt.gcf(),save_path)
+
+    return ax
+
+def vk_diagram(df:pd.DataFrame,title:str=None,save_path:str=None,ax:plt.Axes=None,xlim:list=[],ylim:list=[],legend=False,**kwargs):
+    
+    marker = kwargs.get('marker','.')
+    kwargs.pop('marker', None)
+
+    if ax == None:
+        fig, ax = plt.subplots()
+    
+    mappable = ax.scatter(df['O/C'], df['H/C'],marker=marker,**kwargs)
+    ax.set_xlabel('O/C',fontsize=normal_fontsize) 
+    ax.set_ylabel('H/C',fontsize=normal_fontsize)
+    if legend:
+        ax.legend(framealpha=1,bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0,fontsize=normal_fontsize)
+    
+    if xlim != []: ax.set_xlim(xlim)
+    if ylim != []: ax.set_ylim(ylim)
+
+    if title != None:
+        ax.set_title(title,fontsize=title_fontsize)
+
+    if save_path!=None:
+        save_fig(plt.gcf(),save_path)
+    
+    return mappable
+
+def density_vk_diagram(df:pd.DataFrame,cmap='viridis',title:str=None,save_path:str=None,
+                       ax:plt.Axes=None,fig:plt.Figure=None,cbar:bool=True,xlim:list=[],ylim:list=[],**kwargs):
+
+    # from https://stackoverflow.com/questions/20105364/how-can-i-make-a-scatter-plot-colored-by-density
+
+    if 'O/C' not in df.columns:
+        df['O/C'] = df['O'] / df['C']
+    if 'H/C' not in df.columns:
+        df['H/C'] = df['H'] / df['C']
+
+    x = df['O/C']
+    y = df['H/C']
+
+    xy = np.vstack([x,y])
+    z = gaussian_kde(xy)(xy)
+
+    # Sort the points by density, so that the densest points are plotted last
+    idx = z.argsort()
+    x, y, z = x[idx], y[idx], z[idx]
+
+    if ax == None:
+        fig, ax = plt.subplots()
+    
+    mappable = ax.scatter(x, y, c=z, marker='.',cmap=cmap,**kwargs)
+
+    if cbar:
+        cbar = fig.colorbar(mappable)
+        cbar.set_label('Kernel Density',fontsize=normal_fontsize)
+
+    ax.set_xlabel('O/C',fontsize=normal_fontsize) 
+    ax.set_ylabel('H/C',fontsize=normal_fontsize)
+
+    if xlim != []: ax.set_xlim(xlim)
+    if ylim != []: ax.set_ylim(ylim)
+
+    if title != None:
+        ax.set_title(title,fontsize=title_fontsize)
+
+    if save_path!=None:
+        save_fig(plt.gcf(),save_path)
+
+    return mappable
+
+
+def vk_molecclass(df:pd.DataFrame,regions:dict=vk_areas.copy(),region_colours:dict=vk_region_colours,title:str=None,save_path:str=None,
+                  ax:plt.Axes=None,xlim:list=[],ylim:list=[],legend=True,**kwargs):
 
     # assert len(region_colours) == len(regions)+1, 'The length of region_colours should be that of the regions + 1 to account for the class "Unassigned".'
 
@@ -360,7 +367,7 @@ def vk_molecclass(df:pd.DataFrame,regions:dict=vk_areas.copy(),region_colours:di
         # regions.pop('Peptides2',None)
         regions['Peptides'] = []
 
-    if fig == None and ax == None:
+    if ax == None:
         fig, ax = plt.subplots()
         
     # zorder determined by how many compounds are present in that class: the more, the lower the zorder
@@ -379,7 +386,8 @@ def vk_molecclass(df:pd.DataFrame,regions:dict=vk_areas.copy(),region_colours:di
 
     ax.set_xlabel('O/C',fontsize=normal_fontsize) 
     ax.set_ylabel('H/C',fontsize=normal_fontsize)
-    ax.legend(framealpha=1,bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0,fontsize=normal_fontsize)
+    if legend:
+        ax.legend(framealpha=1,bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0,fontsize=normal_fontsize)
     
     if xlim != []: ax.set_xlim(xlim)
     if ylim != []: ax.set_ylim(ylim)
@@ -388,9 +396,9 @@ def vk_molecclass(df:pd.DataFrame,regions:dict=vk_areas.copy(),region_colours:di
         ax.set_title(title,fontsize=title_fontsize)
 
     if save_path != None:
-        save_fig(fig,save_path)
+        save_fig(plt.gcf(),save_path)
     
-    return fig, ax
+    return ax
 
 def AI(c:int|np.ndarray,h:int|np.ndarray,n:int|np.ndarray,o:int|np.ndarray,s:int|np.ndarray,p:int|np.ndarray)->float|np.ndarray:
     ai = None
@@ -410,7 +418,7 @@ def AI(c:int|np.ndarray,h:int|np.ndarray,n:int|np.ndarray,o:int|np.ndarray,s:int
 
     return ai
 
-def vk_ai(df:pd.DataFrame,ai,values=ai_boundaries,colour=ai_colours,title=None,save_path=None,fig:plt.Figure=None,ax:plt.Axes=None,alpha=.5,xlim:list=[],ylim:list=[],**kwargs):
+def vk_ai(df:pd.DataFrame,ai,values=ai_boundaries,colour=ai_colours,title=None,save_path=None,ax:plt.Axes=None,alpha=.5,xlim:list=[],ylim:list=[],**kwargs):
 
     values = np.sort(values)
     labels = [f'AI $\\leq$ {values[0]}']
@@ -426,7 +434,7 @@ def vk_ai(df:pd.DataFrame,ai,values=ai_boundaries,colour=ai_colours,title=None,s
 
         # if last
         elif j == len(values):
-            labels.append(f'AI $\\leq$ {values[-1]}')
+            labels.append(f'AI $\\geq$ {values[-1]}')
             idxs.append(np.where(ai >= values[-1]))
 
         # if second to last
@@ -439,7 +447,7 @@ def vk_ai(df:pd.DataFrame,ai,values=ai_boundaries,colour=ai_colours,title=None,s
             labels.append(f'{values[j-1]} < AI $\\leq$ {values[j]}')
             idxs.append(np.where((ai > values[j-1])&(ai <= values[j])))
 
-    if fig == None and ax == None:
+    if ax == None:
         fig, ax = plt.subplots()
     
     for i in range(len(idxs)):
@@ -459,6 +467,6 @@ def vk_ai(df:pd.DataFrame,ai,values=ai_boundaries,colour=ai_colours,title=None,s
         ax.set_title(title,fontsize=title_fontsize)
 
     if save_path!=None:
-        save_fig(fig,save_path)
+        save_fig(plt.gcf(),save_path)
 
-    return fig, ax
+    return ax

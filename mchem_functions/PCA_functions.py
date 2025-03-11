@@ -2,9 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import decomposition
 import scipy.stats
+import matplotlib.patheffects as pe
 
-labelsize = 12
-titlesize = 15
+labelsize = 11
+titlesize = 16
 
 def SNV(x:np.ndarray)->np.ndarray:
     new = np.zeros_like(x)
@@ -52,7 +53,7 @@ def get_pca_data(data:np.ndarray,no_of_components:int=None,method:str='SNV')->tu
 def save_figure(fig:plt.Figure,save_path:str):
     fig.savefig(save_path, dpi = 600, facecolor = '#fff', bbox_inches='tight')
 
-def scores_plot(scores_values:np.ndarray,PCs:list|np.ndarray,fig:plt.Figure=None,ax:plt.Axes=None,lines:bool=True,**kwargs):
+def scores_plot(scores_values:np.ndarray,PCs:list|np.ndarray,ax:plt.Axes=None,titlesize=titlesize,lines:bool=True,**kwargs):
     '''
     Plot a Scores plot.
 
@@ -65,29 +66,29 @@ def scores_plot(scores_values:np.ndarray,PCs:list|np.ndarray,fig:plt.Figure=None
         - save_path: the directory path where you want to save the plot.
     '''
     title = kwargs.get('title',None)
-    c = kwargs.get('c',None)
     cmap = kwargs.get('cmap',None)
     cbar_title = kwargs.get('cbar_title',None)
     save_path = kwargs.get('save_path',None)
-    label = kwargs.get('label',None)
-    marker = kwargs.get('marker',None)
+    # label = kwargs.get('label',None)
     variance_ratio = kwargs.get('variance_ratio',[])
+    if 'variance_ratio' in kwargs.keys():
+        variance_ratio = kwargs['variance_ratio']
+        kwargs.pop('variance_ratio')
+
     norm = kwargs.get('norm',None)
     cbar_yn = kwargs.get('cbar_yn',True)
 
     # fig = kwargs.get('fig',None)
     # ax = kwargs.get('ax',None)
 
-    if fig == None:
-        fig = plt.figure()
     if ax == None:
-        ax = fig.add_subplot()
+        fig, ax = plt.subplots()
 
-    # ax.scatter(scores_values[:,PCs[0]-1],scores_values[:,PCs[1]-1], c=c, cmap=cmap,label=label,marker=marker)
+    # ax.scatter(scores_values[:,PCs[0]-1],scores_values[:,PCs[1]-1], c=c, cmap=cmap,label=label)
 
-    mappable = ax.scatter(scores_values[:,PCs[0]-1],scores_values[:,PCs[1]-1], c=c, cmap=cmap,label=label,marker=marker,norm=norm,zorder=5)
+    mappable = ax.scatter(scores_values[:,PCs[0]-1],scores_values[:,PCs[1]-1], cmap=cmap,norm=norm,**kwargs)
 
-    if label != None:
+    if 'label' in kwargs.keys():
         ax.legend(bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0,fontsize=labelsize)
 
     if len(variance_ratio)>0:
@@ -101,8 +102,8 @@ def scores_plot(scores_values:np.ndarray,PCs:list|np.ndarray,fig:plt.Figure=None
     ax.set_ylabel(f'PC{PCs[1]}{var_text_y}',fontsize=labelsize)
 
     if lines == True:
-        ax.axhline(y=0, color = '#000', linewidth = 1)
-        ax.axvline(x=0, color = '#000', linewidth = 1)
+        ax.axhline(y=0, color = '#000', linewidth = 1,zorder=-5)
+        ax.axvline(x=0, color = '#000', linewidth = 1,zorder=-5)
 
     if title == None:
         title = 'Scores Plot'
@@ -139,7 +140,7 @@ def Hotelling(scores_values:np.ndarray,PCs:list|np.ndarray,ax:plt.Axes,confidenc
         ax.legend(bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0,fontsize=labelsize)
     #ax.grid(color = 'lightgray', linestyle = '--')
 
-def scree_plot(PCs:np.ndarray|list,variance_ratio:np.ndarray|list,fig:plt.Figure=None,ax:plt.Axes=None,**kwargs):
+def scree_plot(PCs:np.ndarray|list,variance_ratio:np.ndarray|list,ax:plt.Axes=None,**kwargs):
     '''
     This function plots Scree plots given a list of principal compontents (PCs) and their associated explained variance (eigenvalue). 
 
@@ -150,10 +151,10 @@ def scree_plot(PCs:np.ndarray|list,variance_ratio:np.ndarray|list,fig:plt.Figure
         - save_path: the directory path where you want to save the plot.
     '''
     
-    if fig == None:
-        fig = plt.figure()
+    PCs = np.array(PCs)
+
     if ax == None:
-        ax = fig.add_subplot()
+        fig, ax = plt.subplots()
 
     line_colour = kwargs.get('line_colour',None)
     bar_colour = kwargs.get('bar_colour',None)
@@ -163,28 +164,33 @@ def scree_plot(PCs:np.ndarray|list,variance_ratio:np.ndarray|list,fig:plt.Figure
     if line_colour == None: line_colour = 'darkorange'
     if bar_colour == None: bar_colour = 'green'
 
-    ax.plot(PCs,variance_ratio*100,'o-',linewidth=2,color=line_colour)
+    ax.plot(PCs,variance_ratio[PCs-1]*100,'o-',linewidth=2,color=line_colour)
+
+    text_padding = (np.max(ax.get_ylim()) - np.min(ax.get_ylim())) * 0.01
+
 
     cumulative_sum = 0
     for i in np.arange(len(PCs)):
-        cumulative_sum += variance_ratio[i]*100
+        cumulative_sum += variance_ratio[PCs[i]-1]*100
         if i == 0:
             ax.bar(PCs[i],cumulative_sum,color=bar_colour,width = 0.5,label='Cum')
         else:
             ax.bar(PCs[i],cumulative_sum,color=bar_colour,width = 0.5)
-    
+        
+        ax.text(PCs[i],variance_ratio[PCs[i]-1]*100+text_padding,f'{np.round(variance_ratio[PCs[i]-1]*100,2)}%',
+                path_effects=[pe.withStroke(linewidth=2, foreground="#fff")])     
+
     ax.legend(bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0,fontsize=labelsize)
 
     ax.set_xlabel('Principal Component',fontsize=labelsize)
     ax.set_ylabel('Variance Explained (%)',fontsize=labelsize)
-
     
     ax.set_title(title,fontsize=titlesize)
 
     if save_path != None:
         save_figure(fig,save_path)
 
-def loadings_plot(variables:np.ndarray|list,loadings:np.ndarray,PCs:np.ndarray|list,fig:plt.Figure=None,ax:plt.Axes=[],**kwargs):
+def loadings_plot(variables:np.ndarray|list,loadings:np.ndarray,PCs:np.ndarray|list,ax:plt.Axes=None,fig:plt.Figure=None,**kwargs):
     '''
     Plot a Loadings plot given a set of variables (numeric or strings) and the principal components (PCs) associated with them.
     This function supports multiple loadings plots in a single figure and single-axes loadings plots.
@@ -197,39 +203,36 @@ def loadings_plot(variables:np.ndarray|list,loadings:np.ndarray,PCs:np.ndarray|l
         - invert_axis: set whether the x-axis should go from smallest to largest value (False) or from largest to smallest value (True).
     '''
 
-    if fig is None:
+    if type(ax) not in [np.ndarray,plt.Axes]:
         fig = plt.figure()
-    if ax == []:
         ax = fig.subplots(len(PCs),sharex=True)
-    
-    c = kwargs.get('c',None)
+        
     title = kwargs.get('title','Loadings Plots')
     save_path = kwargs.get('save_path',None)
     invert_axis = kwargs.get('invert_axis',False)
     text_rotation = kwargs.get('text_rotation',60)
     xlabel = kwargs.get('xlabel',None)
     
-    kwargs.pop('c', None)
     kwargs.pop('title', None)
     kwargs.pop('save_path', None)
     kwargs.pop('invert_axis', None)
     kwargs.pop('text_rotation', None)
     kwargs.pop('xlabel', None)
 
-    def just_the_loadings_plots(ax,i,**kwargs):
+    def just_the_loadings_plots(ax:plt.Axes,i,**kwargs):
         ax.axhline(y=0, color = '#000', linewidth = 0.7)#, linewidth = 1, linestyle='--')
-        ax.plot(variables,loadings[PCs[i]-1,:],c=c,**kwargs),#linewidth = 2,color = '#008000'
+        ax.plot(variables,loadings[:,PCs[i]-1],**kwargs),#linewidth = 2,color = '#008000'
         ax.set_ylabel(f'PC{PCs[i]}\nLoadings',fontsize=labelsize)
 
     if np.any([isinstance(v,str) for v in variables]):
         locationsx = np.arange(len(variables))
         if len(PCs) == 1:
             just_the_loadings_plots(ax,0,**kwargs)
-            ax.set_xticks(locationsx,variables,rotation = text_rotation)
+            ax.set_xticks(locationsx,variables,rotation = text_rotation, ha='right',va='center',rotation_mode='anchor')
         else:
             for i in range(len(PCs)):
                 just_the_loadings_plots(ax[i],i,**kwargs)
-                ax[i].set_xticks(locationsx,variables,rotation = text_rotation)
+                ax[i].set_xticks(locationsx,variables,rotation = text_rotation, ha='right',va='center',rotation_mode='anchor')
 
     else:
         if len(PCs) == 1:
@@ -246,12 +249,14 @@ def loadings_plot(variables:np.ndarray|list,loadings:np.ndarray,PCs:np.ndarray|l
         else: ax0.set_xlim(np.max(variables),np.min(variables))
         
         ax_minus1.set_xlabel(xlabel,fontsize=labelsize)
-     
+
     if len(PCs) == 1: ax.set_title(title,fontsize=titlesize)
     else: fig.suptitle(title,fontsize=titlesize)
 
     if save_path != None:
         save_figure(fig,save_path)
+    
+    return ax
 
 
 def corr_matrix(variables:np.ndarray|list,loadings:np.ndarray,PCs:np.ndarray|list,fig:plt.Figure=None,ax:plt.Axes=None,**kwargs)->np.ndarray:    

@@ -1,0 +1,25 @@
+ELEMENTAL PARAMETERS:
+	C: 1, 100
+	H: 1, 200
+	O: 0, 40
+	#N: 0, 3
+	#S: 0, 1
+---
+DBE: 0, 50
+---
+PPM ERROR: 0.2
+---
+MODE: -
+---
+NOISE THRESHOLD STD: 3
+---
+CALIB PPM THRESHOLD: 0, 2.4
+---
+O/C: 0, 1.2
+---
+H/C: 0.3, 2.5
+---
+N/C: 0, 1.5
+---
+
+
