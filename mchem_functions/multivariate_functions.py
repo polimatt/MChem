@@ -271,6 +271,9 @@ def nodes_vs_edges_matrix(nodes,edges):
 # Multivariate methods
 
 def PCA(matrix:np.ndarray,n_components:int=None):
+    '''
+    Calculate the PCA of an observations vs variables matrix.
+    '''
     Y = matrix.copy()
     Y_c = np.subtract(Y,np.mean(Y,axis=0))
     # n is number of observations (samples)
@@ -380,6 +383,9 @@ def PCoA(distance_matrix:np.ndarray,variables:np.ndarray=[],number_of_dimensions
 
 
 def OLS(Y:np.ndarray,X:np.ndarray):
+    '''
+    Ordinary leat squares regression.
+    '''
     return X @ la.inv(X.T @ X) @ X.T @ Y
 
 def RDA(Y:np.ndarray,X:np.ndarray,confidence:float=0.95,verbose:bool=True):
@@ -399,6 +405,7 @@ def RDA(Y:np.ndarray,X:np.ndarray,confidence:float=0.95,verbose:bool=True):
 
     # Do Ordinary least squares (OLS) on X and Y
     Y_hat = OLS(Y_c,X)
+    B = la.inv(X.T @ X) @ X.T @ Y_c
 
     # Y_hat = la.lstsq(Y_c,X)[0]
 
@@ -449,7 +456,7 @@ def RDA(Y:np.ndarray,X:np.ndarray,confidence:float=0.95,verbose:bool=True):
     # (2) Calculate the F-statistic
     F_statistic = (R2_YX / v1) / ( (1 - R2_YX) / v2)
 
-    # (3) Compare with the F critical value and text the null-hypothesis
+    # (3) Compare with the F critical value and test the null-hypothesis
     crit_F_value = scipy.stats.f.ppf(q=confidence, dfn=v1, dfd=v2)
     H_0 = F_statistic < crit_F_value
     
@@ -461,7 +468,7 @@ def RDA(Y:np.ndarray,X:np.ndarray,confidence:float=0.95,verbose:bool=True):
         print(f'The null-hypothesis is {H_0} in the {confidence*100}% confidence range (F-statistic = {np.round(F_statistic,2)}, critical F value = {np.round(crit_F_value,2)}).')
         print(f'p = {np.round(p_value,3)}')
 
-    return (eigvals_can, proportion_explained_can, U_can, Z_can, eigvals_noncan,
+    return (B,eigvals_can, proportion_explained_can, U_can, Z_can, eigvals_noncan,
             proportion_explained_noncan, U_noncan, Z_noncan, R2_YX, R2_a, r_k,
             R_XZ, BS_1, F_statistic, crit_F_value, p_value)
 

@@ -53,7 +53,8 @@ def get_pca_data(data:np.ndarray,no_of_components:int=None,method:str='SNV')->tu
 def save_figure(fig:plt.Figure,save_path:str):
     fig.savefig(save_path, dpi = 600, facecolor = '#fff', bbox_inches='tight')
 
-def scores_plot(scores_values:np.ndarray,PCs:list|np.ndarray,ax:plt.Axes=None,titlesize=titlesize,lines:bool=True,**kwargs):
+def scores_plot(scores_values:np.ndarray,PCs:list|np.ndarray,ax:plt.Axes=None,title:str=None,titlesize=titlesize,
+                lines:bool=True,variance_ratio:np.ndarray=[],**kwargs):
     '''
     Plot a Scores plot.
 
@@ -65,15 +66,10 @@ def scores_plot(scores_values:np.ndarray,PCs:list|np.ndarray,ax:plt.Axes=None,ti
         - cbar_title: title of the colour bar.
         - save_path: the directory path where you want to save the plot.
     '''
-    title = kwargs.get('title',None)
     cmap = kwargs.get('cmap',None)
     cbar_title = kwargs.get('cbar_title',None)
     save_path = kwargs.get('save_path',None)
     # label = kwargs.get('label',None)
-    variance_ratio = kwargs.get('variance_ratio',[])
-    if 'variance_ratio' in kwargs.keys():
-        variance_ratio = kwargs['variance_ratio']
-        kwargs.pop('variance_ratio')
 
     norm = kwargs.get('norm',None)
     cbar_yn = kwargs.get('cbar_yn',True)
