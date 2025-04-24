@@ -6,7 +6,7 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2025-04-04T11:06:55.681389</dc:date>
+    <dc:date>2025-04-24T11:19:56.440414</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -48,11 +48,11 @@ L 261.681818 34.92
 L 301.136364 34.92 
 L 340.590909 34.92 
 L 380.045455 34.92 
-" clip-path="url(#p969a674044)" style="fill: none; stroke: #808080; stroke-width: 2.5; stroke-linecap: square"/>
+" clip-path="url(#p5244301290)" style="fill: none; stroke: #808080; stroke-width: 2.5; stroke-linecap: square"/>
    </g>
    <g id="PathCollection_1">
     <defs>
-     <path id="mc3dfc7b18d" d="M 0 16.583124 
+     <path id="m0c5928043f" d="M 0 16.583124 
 C 4.397896 16.583124 8.616257 14.835821 11.726039 11.726039 
 C 14.835821 8.616257 16.583124 4.397896 16.583124 0 
 C 16.583124 -4.397896 14.835821 -8.616257 11.726039 -11.726039 
@@ -64,15 +64,15 @@ C -8.616257 14.835821 -4.397896 16.583124 0 16.583124
 z
 " style="stroke: #1f77b4"/>
     </defs>
-    <g clip-path="url(#p969a674044)">
-     <use xlink:href="#mc3dfc7b18d" x="64.409091" y="34.92" style="fill: #1f77b4; stroke: #1f77b4"/>
-     <use xlink:href="#mc3dfc7b18d" x="222.227273" y="34.92" style="fill: #1f77b4; stroke: #1f77b4"/>
-     <use xlink:href="#mc3dfc7b18d" x="380.045455" y="34.92" style="fill: #1f77b4; stroke: #1f77b4"/>
+    <g clip-path="url(#p5244301290)">
+     <use xlink:href="#m0c5928043f" x="64.409091" y="34.92" style="fill: #1f77b4; stroke: #1f77b4"/>
+     <use xlink:href="#m0c5928043f" x="222.227273" y="34.92" style="fill: #1f77b4; stroke: #1f77b4"/>
+     <use xlink:href="#m0c5928043f" x="380.045455" y="34.92" style="fill: #1f77b4; stroke: #1f77b4"/>
     </g>
    </g>
    <g id="PathCollection_2">
     <defs>
-     <path id="m71c87ce828" d="M 0 1.118034 
+     <path id="mf7a75f519b" d="M 0 1.118034 
 C 0.296506 1.118034 0.580908 1.000231 0.790569 0.790569 
 C 1.000231 0.580908 1.118034 0.296506 1.118034 0 
 C 1.118034 -0.296506 1.000231 -0.580908 0.790569 -0.790569 
@@ -84,14 +84,14 @@ C -0.580908 1.000231 -0.296506 1.118034 0 1.118034
 z
 " style="stroke: #000000"/>
     </defs>
-    <g clip-path="url(#p969a674044)">
-     <use xlink:href="#m71c87ce828" x="24.954545" y="34.92" style="stroke: #000000"/>
-     <use xlink:href="#m71c87ce828" x="103.863636" y="34.92" style="stroke: #000000"/>
-     <use xlink:href="#m71c87ce828" x="143.318182" y="34.92" style="stroke: #000000"/>
-     <use xlink:href="#m71c87ce828" x="182.772727" y="34.92" style="stroke: #000000"/>
-     <use xlink:href="#m71c87ce828" x="261.681818" y="34.92" style="stroke: #000000"/>
-     <use xlink:href="#m71c87ce828" x="301.136364" y="34.92" style="stroke: #000000"/>
-     <use xlink:href="#m71c87ce828" x="340.590909" y="34.92" style="stroke: #000000"/>
+    <g clip-path="url(#p5244301290)">
+     <use xlink:href="#mf7a75f519b" x="24.954545" y="34.92" style="stroke: #000000"/>
+     <use xlink:href="#mf7a75f519b" x="103.863636" y="34.92" style="stroke: #000000"/>
+     <use xlink:href="#mf7a75f519b" x="143.318182" y="34.92" style="stroke: #000000"/>
+     <use xlink:href="#mf7a75f519b" x="182.772727" y="34.92" style="stroke: #000000"/>
+     <use xlink:href="#mf7a75f519b" x="261.681818" y="34.92" style="stroke: #000000"/>
+     <use xlink:href="#mf7a75f519b" x="301.136364" y="34.92" style="stroke: #000000"/>
+     <use xlink:href="#mf7a75f519b" x="340.590909" y="34.92" style="stroke: #000000"/>
     </g>
    </g>
    <g id="matplotlib.axis_1"/>
@@ -567,7 +567,7 @@ z
   </g>
  </g>
  <defs>
-  <clipPath id="p969a674044">
+  <clipPath id="p5244301290">
    <rect x="7.2" y="7.2" width="390.6" height="55.44"/>
   </clipPath>
  </defs>
